@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Food Menu</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f4f4f4;
+    background-image: url(My\ first\ design.png);
+  }
+  .container {
+    max-width: 800px;
+    margin: 20px auto;
+    padding: 20px;
+    background-color: #f0e7e7;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    position: relative;
+  }
+  h1 {
+    text-align: center;
+    color: #333;
+  }
+  .menu-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #a41919;
+    padding: 10px 0;
+    margin-bottom: 10px;
+  }
+  .menu-item:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+  }
+  .menu-item img {
+    max-width: 100px;
+    margin-right: 20px;
+    border-radius: 5px;
+  }
+  .menu-item-info {
+    flex-grow: 1;
+  }
+  .menu-item-info h3 {
+    margin: 0;
+    color: #333;
+  }
+  .menu-item-info p {
+    margin: 5px 0;
+    color: #666;
+  }
+  .order-now {
+    text-align: center;
+    margin-top: 20px;
+  }
+  .order-now a {
+    display: inline-block;
+    padding: 10px 20px;
+    background-color: #4caf50;
+    color: #fff;
+    text-decoration: none;
+    border-radius: 5px;
+    transition: background-color 0.3s ease;
+  }
+  .order-now a:hover {
+    background-color: #45a049;
+  }
+  .view-cart {
+    position: fixed;
+    top: 0;
+    right: 0;
+    background-color: #0e9506;
+    width: 300px;
+    height: 100%;
+    padding: 20px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease;
+    overflow-y: auto;
+    transform: translateX(100%);
+  }
+  .view-cart.open {
+    transform: translateX(0);
+  }
+  .view-cart-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+  }
+  .view-cart-header h2 {
+    margin: 0;
+    color: #333;
+  }
+  .view-cart-close {
+    cursor: pointer;
+  }
+  .view-cart-content {
+    margin-bottom: 20px;
+  }
+  .view-cart-total {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-weight: bold;
+  }
+  .payment-options {
+    text-align: center;
+  }
+  .toggle-cart-btn {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background-color: #4caf50;
+    color: #fff;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    z-index: 999;
+    transition: opacity 0.3s ease;
+    background-image: url(Designer.png);
+  }
+  .toggle-cart-btn.hide {
+    opacity: 0;
+    pointer-events: none;
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <h1>Food Menu</h1>
+
+  <div id="menu-container"></div>
+
+  <div class="toggle-cart-btn" id="toggle-cart-btn" onclick="toggleCart()">Toggle Cart</div>
+
+  <div class="view-cart" id="view-cart">
+    <div class="view-cart-header">
+      <h2>Cart</h2>
+      <span class="view-cart-close" onclick="toggleCart()">×</span>
+    </div>
+    <div class="view-cart-content" id="cart-items">
+      
+    </div>
+    <div class="view-cart-total">
+      <span>Total:</span>
+      <span id="cart-total">₹0.00</span>
+    </div>
+    <div class="payment-options">
+      <button onclick="checkout()">Proceed to Checkout</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  const menuContainer = document.getElementById('menu-container');
+  const viewCart = document.getElementById('view-cart');
+  const cartItemsContainer = document.getElementById('cart-items');
+  const cartTotalElement = document.getElementById('cart-total');
+  const toggleCartBtn = document.getElementById('toggle-cart-btn');
+
+  let cart = [];
+  let isCartOpen = false;
+
+  
+  const menuItems = [
+    { name: 'pasta', price: 59.99, description: 'Delicious veg pats with lettuce, tomato, and cheese.<br>By Rest U', image: 'a2.jpeg' },
+    { name: 'Pizza', price: 89.99, description: 'Classic pizza with marinara sauce, cheese, and your choice of toppings.', image: 'a.jpeg' },
+    { name: 'Samosa', price: 79.99, description: 'veg samosa <br>By Rest U', image: 'a3.jpeg' },
+    { name: 'chicken', price: 95.99, description: 'Delicious chicken with lettuce, tomato, and cheese.<br>By Rest U', image: 'a4.jpeg' },
+    { name: 'Aloo parantha', price: 18.99, description: 'parantha<br>By Rest U', image: 'a5.jpeg' },
+    { name: 'Fruit chaat', price: 57.99, description: '<br>By Rest U', image: 'a6.jpeg' },
+    { name: 'coca cola', price: 45.99, description: '<br>By Rest U.', image: 'a7.jpeg' },
+    { name: 'Mix fruit Juice', price: 58.99, description: '<br>By Rest U', image: 'a8.jpeg' },
+    { name: '7 up', price: 39.99, description: '<br>By Rest U.', image: 'a9.jpeg' },
+    { name: 'party drinks', price: 125.99, description: '<br>By Rest U', image: 'a10.jpeg' },
+    { name: 'pizza ', price: 118.99, description: 'Classic chicken pizza with marinara sauce, cheese, and your choice of toppings.', image: 'a.jpeg' },
+    { name: 'lemon juice', price: 27.99, description: '<br>By Rest U.', image: 'a12.jpeg' },
+    { name: 'ice cream', price: 25.99, description: '<br>By Rest U', image: 'a13.jpeg' },
+    { name: 'choclate pastry', price: 58.99, description: '<br>By Rest U', image: 's.jpeg' },
+    { name: 'strawberry pastry', price: 57.99, description: '<br>By Rest U', image: 's1.jpeg' },
+    { name: 'oreo cream', price: 55.99, description: '<br>By Rest U.', image: 's3.jpeg' },
+    { name: 'party sweets', price: 158.99, description: '<br>By Rest U.', image: 's4.jpeg' },
+    { name: 'choclate surprise', price: 207.99, description: '<br>By Rest U.', image: 's5.jpeg' },
+    { name: 'family sweets', price: 505.99, description: '<br>By Rest U.', image: 's6.jpeg' },
+    { name: 'mngo rice', price: 228.99, description: '<br>By Rest U.', image: 's7.jpeg' },
+    { name: 'mix fruit pasrty', price: 97.99, description: '<br>By Rest U', image: 's8.jpeg' },
+    { name: 'gulab jamun', price: 35.99, description: 'per piece <br>By Rest U.', image: 's9.jpeg' },
+    { name: 'Pizza', price: 158.99, description: 'Classic  punjabi thadka pizza with marinara sauce, cheese, and your choice of toppings.<br>By Rest U', image: 'a.jpeg' },
+    { name: 'burger', price: 57.99, description: 'veg burger <br>By Rest U.', image: 'a1.jpeg' },
+    { name: 'pastr', price: 55.99, description: '<br>By Rest U.', image: 'a2.jpeg' },
+    { name: 'Chicken samosa', price: 98.99, description: '<br>By Rest U.', image: 'a3.jpeg' },
+    { name: 'chicken leg piece', price: 97.99, description: '<br>By Rest U', image: 'a4.jpeg' },
+    
+    
+    
+  ];
+
+  
+  function generateMenu() {
+    menuContainer.innerHTML = '';
+    menuItems.forEach(item => {
+      const menuItem = `
+        <div class="menu-item">
+          <img src="${item.image}" alt="${item.name}">
+          <div class="menu-item-info">
+            <h3>${item.name}</h3>
+            <p>₹${item.price.toFixed(2)}</p>
+            <p>${item.description}</p>
+          </div>
+          <div class="order-now">
+            <a href="#" class="order-btn" onclick="addToCart('${item.name}', ${item.price})">Order Now</a>
+          </div>
+        </div>
+      `;
+      menuContainer.innerHTML += menuItem;
+    });
+  }
+
+  
+  generateMenu();
+
+  function addToCart(name, price) {
+    let item = cart.find(item => item.name === name);
+    if (item) {
+      item.quantity++;
+    } else {
+      cart.push({ name: name, price: price, quantity: 1 });
+    }
+    updateCartUI();
+  }
+
+  function updateCartUI() {
+    cartItemsContainer.innerHTML = '';
+    let totalPrice = 0;
+    cart.forEach(item => {
+      const total = item.price * item.quantity;
+      totalPrice += total;
+      cartItemsContainer.innerHTML += `
+        <div class="cart-item">
+          <div>${item.name} - ${item.quantity} x ₹${item.price.toFixed(2)} = ₹${total.toFixed(2)}</div>
+          <div>
+            <button onclick="decrementItem('${item.name}')">-</button>
+            <button onclick="incrementItem('${item.name}')">+</button>
+          </div>
+        </div>
+      `;
+    });
+    cartTotalElement.textContent = `₹${totalPrice.toFixed(2)}`;
+  }
+
+  function incrementItem(name) {
+    const item = cart.find(item => item.name === name);
+    if (item) {
+      item.quantity++;
+      updateCartUI();
+    }
+  }
+
+  function decrementItem(name) {
+    const item = cart.find(item => item.name === name);
+    if (item && item.quantity > 1) {
+      item.quantity--;
+      updateCartUI();
+    }
+  }
+
+  function toggleCart() {
+    isCartOpen = !isCartOpen;
+    if (isCartOpen) {
+      viewCart.classList.add('open');
+      toggleCartBtn.classList.add('hide');
+    } else {
+      viewCart.classList.remove('open');
+      toggleCartBtn.classList.remove('hide');
+    }
+  }
+
+  function checkout() {
+    if (cart.length === 0) {
+      alert('Your cart is empty');
+    } else {
+      const cartData = encodeURIComponent(JSON.stringify(cart));
+      window.location.href = `v2.html?cart=${cartData}`;
+    }
+  }
+</script>
+
+</body>
+</html>
